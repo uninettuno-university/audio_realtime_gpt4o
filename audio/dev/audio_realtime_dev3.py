@@ -93,7 +93,10 @@ async def connect():
                 "type": "session.update",
                 "session": {
                     "modalities": ["text", "audio"],
-                    "instructions": "You are a UNInettino AI assistant.You have to help and guide professors and students",
+                    "instructions": """
+                    You are a Uninettino AI assistant.You have to help and guide professors and students.
+                    Always summarize and answer briefly.
+                    """,
                     "voice": "alloy",
                     "input_audio_format": "pcm16",
                     "output_audio_format": "pcm16",
@@ -106,7 +109,30 @@ async def connect():
                         "prefix_padding_ms": 300,
                         "silence_duration_ms": 100
                     },
-                    "temperature": 0.8,
+                    "tools": [
+                            {
+                        "type": "function",
+                        "name": "get_weather",
+                        "description":  "Get the weather at a given location",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "location": { 
+                                    "type": "string" ,
+                                    "description":"Italy, Rome",
+                                    },
+                                  "scale": {
+                                "type": "string",
+                                "enum": ['celsius', 'farenheit']
+                                },
+                                
+                            },
+                            
+                            "required": ["location", "scale"],
+                        }
+                    }
+                        ],
+                    "temperature": 0.4,
                     "max_response_output_tokens": 5000
                 }
             }
@@ -247,12 +273,13 @@ async def process_server_response(websocket):
                 """
                 print('🔵 AI Response Done.')
                 clear_queue_input()
+                """ 
                 await websocket.send(json.dumps({
                        
                         "type": "input_audio_buffer.cleared",
                     
                     }))
-   
+                """
     except Exception as e:
         logging.error(f"Error processing server response: {e}")
     finally:
