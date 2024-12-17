@@ -107,7 +107,7 @@ async def connect():
                         "type": "server_vad",
                         "threshold": 0.3,
                         "prefix_padding_ms": 300,
-                        "silence_duration_ms": 100
+                        "silence_duration_ms": 150
                     },
                     "tools": [
                             {
@@ -122,18 +122,19 @@ async def connect():
                                     "description":"Italy, Rome",
                                     },
                                   "scale": {
-                                "type": "string",
-                                "enum": ['celsius', 'farenheit']
-                                },
+                                            "type": "string",
+                                            "enum": ['celsius', 'farenheit']
+                                    },
                                 
                             },
                             
                             "required": ["location", "scale"],
+                           
                         }
                     }
                         ],
                     "temperature": 0.4,
-                    "max_response_output_tokens": 5000
+                    "max_response_output_tokens": 6000
                 }
             }
             
@@ -249,13 +250,19 @@ async def process_server_response(websocket):
             
             elif event_type == 'response.audio.delta':
                 logging.info("🔵^^^^^talking AI^^^^^^^^🔵")
+                
                 if not truncated:
                     
                     # Only play audio if user not speaking
                     delta_encoded = message_data.get("delta", "")
                     
                     if delta_encoded:
-                        audio_content = base64.b64decode(delta_encoded)          
+                        audio_content = base64.b64decode(delta_encoded)    
+                        if len(audio_content) >= 6000:
+                            await websocket.send(json.dumps({
+                            "type": "conversation.item.truncate",
+                            "content_index":6000,
+                        }))
                         stream.write(audio_content)
                        
             elif event_type == 'input_audio_buffer.speech_end':
@@ -273,13 +280,7 @@ async def process_server_response(websocket):
                 """
                 print('🔵 AI Response Done.')
                 clear_queue_input()
-                """ 
-                await websocket.send(json.dumps({
-                       
-                        "type": "input_audio_buffer.cleared",
-                    
-                    }))
-                """
+            
     except Exception as e:
         logging.error(f"Error processing server response: {e}")
     finally:
@@ -326,7 +327,7 @@ async def vad_detect(websocket):
                 if not pause_ai_response:
                     pause_ai_response = True
                     logging.info("User started speaking. Sending response.cancel to stop AI.")
-                    await websocket.send(json.dumps({"type": "response.cancel",}))
+                    #await websocket.send(json.dumps({"type": "response.cancel"}))
             else:
                 # No speech detected now
                 if pause_ai_response:
