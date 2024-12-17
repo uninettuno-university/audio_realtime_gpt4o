@@ -13,7 +13,7 @@ import webrtcvad
 from pydub import AudioSegment
 
 # Load environment variables
-load_dotenv(dotenv_path='/home/fikrat/audio/.env')
+load_dotenv(dotenv_path='/home/fikrat/audio_realtime_gpt4o/audio/.env')
 
 
 # Configure logging for better debugging and information

@@ -4,4 +4,4 @@ PyAudio==0.2.14
 3. best_communication_16dec this files manage vad openai
 4. audio_realtime_dev3 this file manager vad openai and vad web (needs to be solved)
 audio_realtime_dev3 manage eeveruything perfectly!
-
+5.realtime_audio_uninettuno_ai e' un file ultima avanzato
